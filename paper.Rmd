@@ -10,6 +10,7 @@ bibliography: mysore_tobacco2016.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.width = 10, scipen=99999)
+if (!dir.exists('Figures')) dir.create('Figures')
 source('analysis.R')
 source('power.R')
 library(knitr)
@@ -180,7 +181,7 @@ tmp5 <- as_hux(tmp4)
 tmp5 <- add_colnames(tmp5)
 tmp5 <- rbind(c("", "Baseline", rep("", 2), "Followup", rep("", 4)), tmp5)
 tmp5 <- merge_cells(tmp5, 1, 5:9)
-caption(tmp5) <- "(#tab:summarystats) Summary statistics for sample demographics and key outcome variables for original sample and those remaining at followup (d: Cohen's d for mean difference; p: p-value for mean difference)."
+caption(tmp5) <- "Summary statistics for sample demographics and key outcome variables for original sample and those remaining at followup (d: Cohen's d for mean difference; p: p-value for mean difference)."
 tmp5
 
 ```
