@@ -3,7 +3,10 @@ title: The impact of information about tobacco-related reproductive vs. general 
 author: Caitlyn D. Placek, Renee E. Magnan, Vijaya Srinivas, Poornima Jaykrishna, Kavitha Ravi, Anisa Khan, Purnima Madhivanan and Edward H. Hagen
 output: 
   bookdown::html_document2:
+    toc: false
+    toc_depth: 2
     number_sections: false
+always_allow_html: true
 csl: apa.csl
 bibliography: mysore_tobacco2016.bib
 ---
@@ -14,11 +17,9 @@ if (!dir.exists('Figures')) dir.create('Figures')
 source('analysis.R')
 source('power.R')
 library(knitr)
+library(kableExtra)
 library(patchwork)
-library(huxtable)
-# library(gtsummary)
 library(modelsummary)
-library(broom.mixed)
 ```
 
 # Abstract
@@ -53,7 +54,7 @@ We specifically predicted that reproductive-aged women in a disadvantaged popula
 
 The adverse health consequences associated with tobacco use in India vary according to caste categories and socioeconomic status. Indigenous populations, nationally recognized as Scheduled Tribes, or *Adivasis*, are considered the most marginalized group in India with the greatest health disparities [@international_institute_of_population_sciences_india_2000]. Scheduled Tribes tend to report higher rates of tobacco use compared to other castes [@rani_tobacco_2003; @subramanian_indigenous_2006; @subramanian_patterns_2004], which probably helps explain why Scheduled tribes also suffer from high rates of oral submucous fibrosis, oral cancer, hypertension, as well as other oral and cardiovascular diseases, all of which are linked to smokeless tobacco use [@deepa_prevalence_2013; @deo_prevalence_2017; @gupta_oral_1998; @mukhopadhyay_detecting_2006]. India also ranks among the highest in oral cancer rates among women [@mohan_oral_2016]. Furthermore, smokeless tobacco use is strongly associated with stillbirths among Indian women [@gupta_smokeless_2003; @roberts_social_2012]. Cultural norms might exacerbate tobacco use when communities report benefits of tobacco use and lack models of its adverse impact on general and reproductive health [@gupta_smokeless_2013]. *Jenu Kuruba* women from Mysore, Karnataka, for example, rely on smokeless tobacco for energy while working in agricultural fields, and did not report any costs to reproduction [@placek_exploring_2019]. 
 
-*Jenu Kuruba* women report learning to chew tobacco for its perceived positive benefits and because prominent members of the community are tobacco users [@placek_exploring_2019]. Since cultural transmission via prestigious individuals can impact ingestive behaviors in pregnancy, this study draws upon the influence of members from a public health institute to transmit reproductive harms of tobacco to *Jenu Kuruba* women. This mode of transmission is predicted to be effective because individuals residing in rural Indian villagers associate biomedical knowledge with power and effectiveness [@nichter1980layperson].
+*Jenu Kuruba* women report learning to chew tobacco for its perceived positive benefits and because prominent members of the community are tobacco users [@placek_exploring_2019]. Since cultural transmission via prestigious individuals can impact ingestive behaviors in pregnancy, this study draws upon the influence of members from a public health institute to transmit reproductive harms of tobacco to *Jenu Kuruba* women. This mode of transmission is predicted to be effective because individuals residing in rural Indian villagers associate biomedical knowledge with power and effectiveness [although this power can also instill caution; @nichter1980layperson].
 
 This study took place among Scheduled Tribe populations residing within Mysore District, Karnataka. Most were *Jenu Kurubas*, former hunter gatherers who were displaced from their residential forest approximately 25-30 years ago [@roy_tribes_2015]. They were forced into government housing and were given plots of land to grow crops for either consumption or sale. They currently reside in small villages and are primarily employed as agricultural workers. Tribal populations in India, such as the *Jenu Kurubas*, are considered to be the most socially and economically disadvantaged members of society [@vijayalakshmi_scheduled_2003], and have been found to have higher food insecurity, worse sanitation, and less education than neighboring rural farmer women [@placek_innate_2017].
 
@@ -175,14 +176,10 @@ tmp2$Time <- "Followup"
 tmp3 <- rbind(tmp, tmp2)
 tmp3$monthly_income <- tmp3$monthly_income/1000
 
-tmp4 <- custom.summarize(tmp3, vars, facvar = 'Time')
-tmp5 <- as_hux(tmp4)
-# tmp5 <- set_number_format(tmp5, )
-tmp5 <- add_colnames(tmp5)
-tmp5 <- rbind(c("", "Baseline", rep("", 2), "Followup", rep("", 4)), tmp5)
-tmp5 <- merge_cells(tmp5, 1, 5:9)
-caption(tmp5) <- "Summary statistics for sample demographics and key outcome variables for original sample and those remaining at followup (d: Cohen's d for mean difference; p: p-value for mean difference)."
-tmp5
+custom.summarize(tmp3, vars, facvar = 'Time') %>% 
+  kable(caption = "Summary statistics for sample demographics and key outcome variables for original sample and those remaining at followup (d: Cohen's d for mean difference; p: p-value for mean difference).") %>% 
+  add_header_above(c(" " = 1, "Baseline" = 3, "Followup" = 3, "Difference" = 2)) %>% 
+  kable_styling()
 
 ```
 
@@ -250,43 +247,27 @@ At both baseline and followup, participants were asked how many times they had u
 
 ```{r regressiontable}
 
-# old name: selfreport
-
-var_dict <- c(
-  '(Intercept)' = '(Intercept)',
-  'trimester2' = 'Trimester 2',
-  'trimester3' = 'Trimester 3',
-  'trimesterNot pregnant' = 'Not pregnant',
-  'PresentationRHP' = 'RHP',
-  'tobacco_24hr_freq2' = 'Baseline Tobacco Frequency',
-  'tobacco_24hr_freq2:PresentationRHP' = 'Baseline Tobacco Frequency * RHP',
-  'pre' = 'Baseline cotinine',
-  'pre:PresentationRHP' = 'Baseline cotinine * RHP',
-  'baseline_number' = 'Baseline number of harms',
-  # 'Reproductive_harms' = 'Number of reproductive harms',
-  # 'General_harms' = 'Number of general harms',
-  'harm_typeReproductive harms' = 'Number of reproductive harms',
-  'PresentationRHP:harm_typeReproductive harms' = 'Number of reproductive harms * RHP',
-  'followup_number' = 'Total number of harms at followup'
-)
-
 modelsummary(
   list(
-    'Tobacco self-report' = m_tobacco_freq, 
-    'Cotinine 1' = m_post1, 
-    'Cotinine 2' = m_post2b,
-    # 'Cotinine 3' = m_cot_rgharms,
-    'Number of harms' = m_harms, 
+    'Tobacco self-report' = m_tobacco_freq,
+    'Cotinine1' = m_post1,
+    'Cotinine2' = m_post2b,
+    'Number of harms' = m_harms,
     'Share presentation' = m_share),
   coef_map = var_dict,
   stars = c("*" = 0.05, "**" = 0.01, "***" = 0.001),
   fmt = '%.2f',
-  gof_omit = c('AIC|BIC|Log.Lik.|REMLcrit')
+  gof_omit = c('AIC|BIC|Log.Lik.|REMLcrit'),
+  statistic_vertical = FALSE,
+  statistic = 'std.error'
+  # output = 'regression table SE.html'
+  # statistic = 'conf.int',
+  # output = 'regression table 95CI.html'
   )
 
 ```
 
-Table 2. Mixed effects regression models of the effect of the intervention on different outcomes, as specified in the table headings. Values are estimated coefficients (standard errors). All models included presentation type (the intervention), control for pregnancy status, and included a random intercept for presentation group. Base level: General harm presentation. RHP: Reproductive harm presentation. **Tobacco self-report**: Negative binomial mixed-effects regression model of self-reported tobacco use frequency at followup, controlling for self-reported baseline frequency. **Cotinine 1**: Linear mixed-effects regression model of followup cotinine concentrations, controlling for baseline cotinine concentrations. **Cotinine 2**: Same as Cotinine 1, except includes an interaction term between baseline cotinine and presentation condition. See Figure \@ref(fig:m5post). **Number of harms**: Poisson mixed effects regression model of the total number of harms mentioned at followup, controlling for number of harms mentioned at baseline. Harms distinguished by general vs. reproductive. This model has double the number of observations because there were two separate counts of harm per participant (reproductive and general); the random effect was thus participant nested within presentation group. See Figure \@ref(fig:harmnum). **Share presentation**: Logistic regression model of sharing information from the presentation as a function of presentation type and the number of harms mentioned at followup. Coefficients are log odds. See Figure S\@ref(fig:sharinglogistic).
+Table 2. Mixed effects regression models of the effect of the intervention on different outcomes, as specified in the table headings. Values are estimated coefficients (standard errors). All models included presentation type (the intervention), control for pregnancy status, and included a random intercept for presentation group. Base levels: Trimester 1 and General harms presentation (GHP). **Tobacco self-report**: Negative binomial mixed-effects regression model of self-reported tobacco use frequency at followup, controlling for self-reported baseline frequency. **Cotinine 1**: Linear mixed-effects regression model of followup cotinine concentrations, controlling for baseline cotinine concentrations. **Cotinine 2**: Same as Cotinine 1, except includes an interaction term between baseline cotinine and presentation condition. See Figure \@ref(fig:m5post). **Number of harms**: Poisson mixed effects regression model of the total number of harms mentioned at followup, controlling for number of harms mentioned at baseline. Harms distinguished by general vs. reproductive. This model has double the number of observations because there were two separate counts of harm per participant (reproductive and general); the random effect was thus participant nested within presentation group. See Figure \@ref(fig:harmnum). **Share presentation**: Logistic regression model of sharing information from the presentation as a function of presentation type and the number of harms mentioned at followup. Coefficients are log odds. See Figure S\@ref(fig:sharinglogistic). For more model statistics, see Table SY.
 
 ```{r cotininecorr}
 r1 <- signif(cor.test(~pre+post, df)$estimate, 2)
@@ -302,7 +283,7 @@ p_m_post
 
 There was no significant main effect of trimester/non-pregnant status, but compared to the first trimester, followup cotinine levels were significantly higher among non-pregnant women (see Table 2, Cotinine 2 model).
 
-Finally, because individuals who exhibited the greatest increases in number of free-listed harms at followup were arguably most heavily influenced by the presentations, we fit an exploratory model of followup cotinine as a function of the changes in number of general harms and reproductive harms mentioned at followup, relative to baseline. Increases in free-listed general and reproductive harms were negatively associated with followup cotinine, and more so for reproductive than general harms. See Table SY.
+Finally, because individuals who exhibited the greatest increases in number of free-listed harms at followup were arguably most heavily influenced by the presentations, we fit an exploratory model of followup cotinine as a function of the changes in number of general harms and reproductive harms mentioned at followup, relative to baseline. Increases in free-listed reproductive harms, but not general harms, were significantly negatively associated with followup cotinine. See Table SX and Figure S\@ref(fig:cotharmfig).
 
 ## Testing prediction 2: Did the intervention increase knowledge of reproductive tobacco harms more than general harms?
 
@@ -370,49 +351,35 @@ Of the `r nrow(followup)` participants at followup, `r sum(followup$presentation
 
 # Discussion
 
-In one of the few cotinine-verified studies of tobacco use among tribal women in India, we found that an alarming `r percent_nonpreg_tobacco`% of non-pregnant women and `r percent_preg_tobacco`% of pregnant women were recent tobacco users. Moreover, a substantial `r misreportPreOrPost`% of women under-reported their recent tobacco use at either baseline or followup (Figure \@ref(fig:baselinecotinine), left panels), a phenomenon that has been documented in several populations [@gorber2009]. We investigated if an anti-tobacco messaging strategy that emphasized near-term reproductive harms would be more effective than a standard messaging strategy in reducing tobacco use, increasing knowledge of harms, increasing intentions to quit, and promoting sharing of information about harms. Our results were mixed, but generally indicated that although most women were not aware of reproductive harms, and that both short presentations were effective at increasing knowledge of harms, the RHP was not more effective than the GHP.
+In one of the few cotinine-verified studies of tobacco use among tribal women in India, we found that an alarming `r percent_nonpreg_tobacco`% of non-pregnant women and `r percent_preg_tobacco`% of pregnant women were recent tobacco users. Moreover, a substantial `r misreportPreOrPost`% of women under-reported their recent tobacco use at either baseline or followup (Figure \@ref(fig:baselinecotinine), left panels), a phenomenon that has been documented in several populations [@gorber2009]. We investigated if an anti-tobacco messaging strategy that emphasized near-term reproductive harms would be more effective than a standard messaging strategy in reducing tobacco use, increasing knowledge of harms, increasing intentions to quit, and promoting sharing of information about harms. Our results were mixed, but generally indicated that although most women were not aware of reproductive harms, and that both short presentations were effective at increasing knowledge of harms, the RHP was not more effective than the GHP on the outcomes of interest.
 
-## Did the RHP reduce tobacco use more than the GHP (prediction 1)?
+Our prediction that the RHP would reduce tobacco use compared to the GHP was supported (see Table 2, Cotinine 2 model), but this result was mainly driven by a few women in the GHP condition who had high cotinine levels at baseline and even higher levels at followup, and a few women in the RHP condition who had high baseline levels but lower levels at followup (see Figure \@ref(fig:m5post)). Thus, this finding does not constitute strong evidence for prediction 1. 
 
-The followup cotinine concentration of participants in the RHP condition was lower than in the GHP condition, controlling for baseline levels and trimester/non-pregnant status (see Figure \@ref(fig:m5post) and Table 2, Cotinine 2 model). This result, although supporting prediction 1, was mainly driven by a few women in the GHP condition who had high cotinine levels at baseline and even higher levels at followup, and a few women in the RHP condition who had high baseline levels but lower levels at followup (see Figure \@ref(fig:m5post)). Thus, this finding does not constitute strong evidence for prediction 1. 
+This finding also had some odd patterns. We expected a coefficient of baseline cotinine on followup cotinine of about 1 in the GHP group, but instead it was about 2 (see Table 2, Cotinine 2 model). This was a longitudinal study in a rural indigenous population that produces tobacco. Population access to tobacco could conceivably have changed over the course of the 10 days between baseline and followup, e.g., due to payment of wages or crop harvesting. If the GHP group took advantage of increased access to tobacco, but the RHP did not (because the latter group was now aware of the reproductive harms), this could explain the increase in the former group but no increase in the latter group. Another possibility is that women knew they would attend a presentation on tobacco and they might have abstained at baseline. But at followup there was no presentation, only a short interview, so perhaps the GHP group did not abstain a second time but the RHP group did (again, because the latter group was now aware of the reproductive harms). Because cotinine values are so variable, though, it's likely that this increase is simply noise. Unfortunately, we don't have the data to investigate the increase in cotinine concentrations in the GHP group. Finally, we found no evidence that participants in the RHP condition were more (or less) likely to reduce or eliminate self-reported tobacco use than those in the GHP condition.
 
-We expected a coefficient of baseline cotinine on followup cotinine of about 1 in the GHP group, and instead it was about 2 (see Table 2, Cotinine 2 model). This was a longitudinal study in a rural indigenous population that produces tobacco. Population access to tobacco could conceivably have changed over the course of the 10 days between baseline and followup, e.g., due to payment of wages or crop harvesting. If the GHP group took advantage of increased access to tobacco, but the RHP did not (because the latter group was now aware of the reproductive harms), this could explain the increase in the former group but no increase in the latter group. Another possibility is that women knew they would attend a presentation on tobacco and they might have abstained at baseline. But at followup there was no presentation, only a short interview, so perhaps the GHP group did not abstain a second time but the RHP group did (again, because the latter group was now aware of the reproductive harms). Because cotinine values are so variable, though, it's possible that this increase is simply noise. Unfortunately, we don't have the data to investigate the increase in cotinine concentrations in the GHP group.
-
-## Did the RHP increase knowledge of harms more than the GHP (prediction 2)?
-
-At baseline, most women failed to mention any reproductive harms of tobacco use, consistent with our expectations. Instead, cancer was by far the most salient harm, followed by "nothing" (see figure \@ref(fig:baselineharm)). About 10 days after viewing a brief presentation, however, `r signif(100*sum(df_fharms$total_followup_harms!=0, na.rm=T)/sum(!is.na(df_fharms$total_followup_harms)), 3)`% of women freelisted at least one harm, and on average freelisted `r signif(mean(df_fharms$total_followup_harms, na.rm=T), 2)` harms, which represented an increase of approximately one harm over baseline. As predicted, the GHP improved knowledge of general harms, and the RHP improved knowledge of reproductive harms, as evidenced by the number and type of harms free-listed from baseline to follow-up (see Figure \@ref(fig:harmnum) and Table 2, Number of harms model). 
+Consistent with our expectations, most women failed to mention any reproductive harms of tobacco use at baseline. Instead, cancer was by far the most salient harm, followed by "nothing" (see figure \@ref(fig:baselineharm)). About 10 days after viewing a brief presentation, however, `r signif(100*sum(df_fharms$total_followup_harms!=0, na.rm=T)/sum(!is.na(df_fharms$total_followup_harms)), 3)`% of women freelisted at least one harm, and on average freelisted `r signif(mean(df_fharms$total_followup_harms, na.rm=T), 2)` harms, which represented an increase of approximately one harm over baseline. As predicted, the GHP improved knowledge of general harms, and the RHP improved knowledge of reproductive harms, as evidenced by the number and type of harms free-listed from baseline to follow-up (see Figure \@ref(fig:harmnum) and Table 2, Number of harms model). 
 
 However, although the brief RHP was effective at increasing awareness of the reproductive harms of tobacco use, it was not *more* effective than the GHP at increasing the total number of harms mentioned at followup, contrary to predictions (see Figure \@ref(fig:harmnum) and Table 2, Number of harms model). Nevertheless, despite the fact that cancer remained by far the most salient harm even in the RHP group, reproductive harms had become quite salient. Consistent with the fetal protection hypothesis, the most salient reproductive harms were to fetal brain development, pregnancy loss, low birth weight, and premature delivery, whereas early menopause and reproductive cancers were less salient (see figure \@ref(fig:RGsalience)A). 
 
-In the GHP condition, specific cancers of the mouth or throat had substantial increases in salience, along with dental problems and heart disease (see Figure \@ref(fig:RGsalience)B). There are at least three possible reasons why tobacco harms related to oral health were particularly salient at baseline, and increased in the GHP condition. First, there is an epidemic of oral cancer in India, and this is salient in tribal regions throughout India [@gupta2013; @mohan_oral_2016], particularly among women and in tribal regions [@deepa_prevalence_2013; @deo_prevalence_2017; @gupta_oral_1998; @mukhopadhyay_detecting_2006]. Second, dental appearance and oral health, e.g., tooth whiteness and gingivitis, are significant components of physical attractiveness [@montero2014; @joiner2017], which is important in many social domains, including romantic relationships [@eastwick2014; @buss2019]. The negative impact of tobacco use on physical attractiveness, in turn, is an important motivation to quit tobacco use [@magnan2017, and references therein]. Third, pregnant women are at increased risk of developing oral health problems, such as gingivitis, dental caries, and periodontal disease [@silk2008oral]. These risks are heightened due to fluctuations in estrogen and progesterone, increased acidity in the dental cavity due to vomiting, and increased cravings and consumption of sugar [@silk2008oral; @gambhir2015oral]. Oral health problems in pregnancy are associated with adverse birth outcomes because women can pass cariogenic bacteria to fetuses, and treating women for periodontal disease can lower rates of preterm birth [@george2011periodontal]. Currently, though, there is no evidence that women are are aware of these associations, which is a topic for future research. Like fetal protection, oral health therefore has near-term consequences for reproductive-age women in a population with high prevalence of oral health problems, both in its impact on physical attractiveness and in its implications for pregnant women.
+There are at least three possible reasons why tobacco harms related to oral health were particularly salient at baseline, and increased in the GHP condition (see Figure \@ref(fig:RGsalience)B). First, there is an epidemic of oral cancer in India, and this is salient in tribal regions throughout India [@gupta2013; @mohan_oral_2016], particularly among women and in tribal regions [@deepa_prevalence_2013; @deo_prevalence_2017; @gupta_oral_1998; @mukhopadhyay_detecting_2006]. Second, dental appearance and oral health, e.g., tooth whiteness and gingivitis, are significant components of physical attractiveness [@montero2014; @joiner2017], which is important in many social domains, including romantic relationships [@eastwick2014; @buss2019]. The negative impact of tobacco use on physical attractiveness, in turn, is an important motivation to quit tobacco use [@magnan2017, and references therein]. Third, pregnant women are at increased risk of developing oral health problems, such as gingivitis, dental caries, and periodontal disease [@silk2008oral]. These risks are heightened due to fluctuations in estrogen and progesterone, increased acidity in the dental cavity due to vomiting, and increased cravings and consumption of sugar [@silk2008oral; @gambhir2015oral]. Oral health problems in pregnancy are associated with adverse birth outcomes because women can pass cariogenic bacteria to fetuses, and treating women for periodontal disease can lower rates of preterm birth [@george2011periodontal]. Currently, though, there is no evidence that women are are aware of these associations, which is a topic for future research. Like fetal protection, oral health therefore has near-term consequences for reproductive-age women in a population with high prevalence of oral health problems, both in its impact on physical attractiveness and in its implications for pregnant women.
 
-## Did the RHP increase self-reported intentions to reduce tobacco use more than the GHP (prediction 3)?
+Community-based research has found that peer-to-peer transmission of tobacco harms is an effective strategy in reducing use because peers are less intimidating than physicians [@secker2000; @williams2011]. Most participants reported that they shared information from the presentations with others, although women in the RHP condition were not more likely to share than women in the GHP condition, contrary to predictions (see Figure S\@ref(fig:sharinglogistic) and Table 2, Share presentation model). This finding nonetheless indicates that sharing in this community is an effective strategy for communicating public health knowledge, and future research should consider using peer-to-peer transmission of tobacco harms to promote cessation in this community.
 
-We found no evidence that participants in the RHP condition were more (or less) likely to reduce or eliminate tobacco use than those in the GHP condition.
-
-## Did the RHP induce more sharing of harms than the GHP (prediction 4)?
-
-Most participants reported that they shared information from the presentations with others, although women in the RHP condition were not more likely to share than women in the GHP condition, contrary to predictions (see Figure S\@ref(fig:sharinglogistic) and Table 2, Share presentation model). Community-based research has found that peer-to-peer transmission of tobacco harms is an effective strategy in reducing use because peers are less intimidating than physicians [@secker2000; @williams2011]. This finding nonetheless indicates that sharing in this community is an effective strategy for communicating public health knowledge, and future research should consider using peer-to-peer transmission of tobacco harms to promote cessation in this community.
-
-## Exploratory analyses
-
-Women who exhibited the greatest increases in the number of free-listed harms at followup relative to baseline were arguably the ones most heavily influenced by the presentations. In support, an exploratory analysis of followup cotinine as a function of the changes in numbers of free-listed general and reproductive harms found that both were significant negative predictors. Intriguingly, the magnitude of the coefficient for changes in the number of reproductive harms was about twice as large as that for changes in the number of general harms.
+One exploratory result was particularly noteworthy. The women who were arguably most heavily influenced by the presentations where those who exhibited the greatest increases in the number of free-listed harms at followup relative to baseline. In support, an exploratory analysis found that an increase in the freelisted number of reproductive harms, but not general harms, was a significant negative predictor of cotinine. See Table SX and Figure S\@ref(fig:cotharmfig).
 
 A second exploratory analysis found that probable use of tobacco was positively associated with older age, income, and number of children, and a few other variables, and negatively associated with being married and pregnant. The positive effect of age is consistent with the higher prevalence of tobacco use seen globally in older women [@ng2014], and this pattern is consistent with the fetal protection hypothesis because the older women in our study were approaching the end of their reproductive careers [and therefore would be less likely to be, or become, pregnant; @hagen2013; @hagen2016]. The positive effect of income with use is consistent with gender inequality models [@hitchman2011], but the positive effect of number of children is not. The negative effect of married status with tobacco use is also seen in other populations [@ramsey2019], and the negative effect of pregnancy status is consistent with the fetal protection model. See Figure S\@ref(fig:user).
-
-## Why did the RHP mostly fail to outperform the GHP?
 
 Although the RHP was effective at increasing knowledge, it generally did not outperform the GHP. There are several possible explanations. First, contrary to our hypothesis, reproductive harms might not be more salient to reproductive-aged women than general harms, especially harms like cancer that are deadly. Second, because most women were aware of at least one general harm of tobacco use but none were aware of any specific reproductive harm, the RHP was providing new knowledge whereas the GHP was often repeating existing knowledge, and repetition is known to increase judgments of truth [@dechene2010]. A greater perceived truth of general harms might have outweighed the putatively greater salience of reproductive harms. Third, in retrospect, some of the most salient general harms, such as mouth cancer and dental problems, reduce facial attractiveness. Attractiveness has near-term consequences for mating and other relationships, and the negative effects of tobacco use on attractiveness motivate quitting [@magnan2017]. Further, as noted earlier, some general harms are associated with perinatal complications. Thus, the general harms might have overlapped with reproductive harms to a certain extent, reducing the differences between the presentations.
 
 ## Limitations
 
-The study had a relatively small sample size. Although we endeavored to restrict each village to a single presentation, two villages had two presentations, and there was some evidence that information leaked from the RHP to the GHP condition: at followup, a few women in the GHP condition mentioned reproductive harms that they did not mention at baseline. This could have reduced differences between the RHP and GHP conditions, and hence our ability to detect an effect of the intervention. Some women's self-reports of tobacco use were unreliable, probably due to cultural norms that limit reporting. Although our measure of cotinine indicated under-reporting, we remain uncertain of women's frequency of tobacco use because we only collected two samples about 10 days apart. Furthermore, our exploratory analyses were unable to detect factors contributing to under-reporting by individual participants. Nevertheless, almost all participants said that it was wrong for women to use tobacco. Given that the research assistants who conducted interviews were connected to a public health institution, it is therefore likely that participants were worried about the stigma attached to tobacco use, and this motivated some to under-report their use. Finally, although women retained knowledge of the previously unknown reproductive harms for 10 days, similar studies have found that the effects of interventions aimed at changing tobacco use behaviors do not last long [@bull2014].
+The study had a relatively small sample size. Although we endeavored to restrict each village to a single presentation, two villages had two presentations, and there was some evidence that information leaked from the RHP to the GHP condition: at followup, a few women in the GHP condition mentioned reproductive harms that they did not mention at baseline. This could have reduced differences between the RHP and GHP conditions, and hence our ability to detect an effect of the intervention. Some women's self-reports of tobacco use were unreliable, probably due to cultural norms that limit reporting. Although our measure of cotinine indicated under-reporting, we remain uncertain of women's frequency of tobacco use because we only collected two samples about 10 days apart. Furthermore, our exploratory analyses were unable to detect factors contributing to under-reporting by individual participants. Nevertheless, almost all participants said that it was wrong for women to use tobacco. Given that the research assistants who conducted interviews were connected to a public health institution, it is therefore likely that participants were worried about the stigma attached to tobacco use, or perhaps cautious about the power associated with biomedical knowledge [@nichter1980layperson], and this motivated some to under-report their use. Furthermore, participants likely use more than one system of medical knowledge (e.g., humoral theory), perhaps ones in which tobacco is viewed as beneficial, and these other systems could have influenced their responses or their continued use of tobacco. Finally, although women retained knowledge of the previously unknown reproductive harms for 10 days, similar studies have found that the effects of interventions aimed at changing tobacco use behaviors do not last long [@bull2014].
 
 # Conclusion
 
 The prevalence of tobacco use among women in LMICs is currently low, and this demographic is therefore increasingly targeted by tobacco companies. It is imperative to develop public health initiatives to counter tobacco advertising and maintain low rates of tobacco use. Unfortunately, health behavior change interventions are often ineffective in low-income groups [@bull2014]. Evolutionary theories predict that individuals in adverse conditions more steeply discount the future, and that the substance use decisions of reproductive-age women are heavily influenced by information about reproductive harms. We therefore used a cluster-randomized controlled design to test if a presentation on tobacco harms that emphasized near-term reproductive harms, such as pregnancy loss, would have a greater negative impact on subsequent tobacco use than one that emphasized general harms that tend to occur later in life, such as cancer. 
 
-As predicted, we found that a disadvantaged population of reproductive-age women in South India were mostly unaware of tobacco's reproductive harms, and that information from a brief presentation on such harms was salient and retained ten days later. Contrary to predictions, we found that presentations on reproductive and general harms had approximately equal effects on subsequent increased knowledge of harms of tobacco use. Future studies of tobacco control messages should take into account local disease ecology, such as the high rate of oral cancer in the study population, and incorporate harms that have near-term consequences for young people, such as negative impacts on attractiveness, and for women, negative impacts on pregnancy.
+As predicted, we found that a disadvantaged population of reproductive-age women in South India were mostly unaware of tobacco's reproductive harms, and that information from a brief presentation on such harms was salient and retained ten days later. Contrary to predictions, we found that presentations on reproductive and general harms had approximately equal effects on subsequent increased knowledge of harms of tobacco use. Nevertheless, an intriguing exploratory analysis found that women who listed an increased number of reproductive harms at followup had significantly lower cotinine levels. Future studies of tobacco control messages should take into account the psychological impact of the messages; the local disease ecology, such as the high rate of oral cancer in the study population; and should incorporate harms that have near-term consequences for young people, such as negative impacts on attractiveness, and for women, negative impacts on pregnancy.
 
 # Supplementary information
 
@@ -498,7 +465,7 @@ ggdotchart(exp(coef_user[-1,1])) + geom_vline(xintercept = 1, linetype = 'dotted
 
 ## Exploratory model of followup cotinine as a function of changes in numbers of free-listed harms from baseline to followup.
 
-Individuals who exhibited the greatest increases in number of free-listed harms at followup were arguably most heavily influenced by the presentations. We therefore fit an exploratory mixed effects linear regression model of followup cotinine as a function of the changes in numbers of free-listed general harms and reproductive harms, controlling for baseline cotinine and Presentation. Increases in the numbers of both types of free-listed harms were negatively associated with followup cotinine, but more so for reproductive harms. See Table SY.
+Individuals who exhibited the greatest increases in number of free-listed harms at followup were arguably most heavily influenced by the presentations. We therefore fit an exploratory mixed effects linear regression model of log10 followup cotinine as a function of the changes in numbers of free-listed general harms and reproductive harms, controlling for log10 baseline cotinine and Presentation. Increases in the numbers of both types of free-listed harms were negatively associated with followup cotinine, but more so for reproductive harms. See Table SY.
 
 ```{r cotharmtab}
 var_dict2 <- c(
@@ -509,24 +476,53 @@ var_dict2 <- c(
   'PresentationRHP' = 'RHP',
   'pre' = 'Baseline cotinine',
   'pre:PresentationRHP' = 'Baseline cotinine * RHP',
-  'Reproductive_harms' = 'Number of reproductive harms',
-  'General_harms' = 'Number of general harms')
+  'Reproductive_harms' = 'ΔNumber of reproductive harms',
+  'General_harms' = 'ΔNumber of general harms')
 
 modelsummary(
-  list('Cotinine' = m_cot_deltargharms),
+  list('Log10 Cotinine' = m_cot_deltargharms),
   coef_map = var_dict2,
   stars = c("*" = 0.05, "**" = 0.01, "***" = 0.001),
   fmt = '%.2f',
+  statistic = 'std.error',  # 'conf.int'
+  statistic_vertical = FALSE,
   gof_omit = c('AIC|BIC|Log.Lik.|REMLcrit')
   )
 ```
 
-Table SY: Linear mixed effects model of followup cotinine concentration as a function of the changes in numbers of general and reproductive harms free-listed at followup compared to baseline, controlling for baseline cotinine and its interaction with presentation condition. Values are estimated coefficients (standard errors).
+Table SY: Linear mixed effects model of log10 followup cotinine concentration as a function of the changes in numbers of general and reproductive harms free-listed at followup compared to baseline, controlling for log10 baseline cotinine and presentation condition. Values are estimated coefficients (standard errors).
+
+```{r cotharmfig, fig.width=10, fig.cap="Effects plot for a regression model of log10 cotinine concentration versus the change in number of (A) general harms and (B) reproductive harms mentioned at followup compared to baseline (see Table SY)."}
+p_m_cot_deltargharmsGH + p_m_cot_deltargharmsRH + plot_annotation(tag_levels='A')
+```
+
 
 ## Logistic regression model of sharing presentation
 
 ```{r sharinglogistic, echo=F, message=F, warning=F, fig.cap="Logistic regression model of the effect of presentation type and the number of harms free-listed at followup on self-reported sharing of presentation with others. Base level is 'Did not share'. For regression coefficients, see Table 2, model Share presentation."}
 plot(allEffects(m_share))
 ```
+
+# Expanded table of regression models
+
+This table displays the coefficents of the same regression models as Table X, but adds z-values, full p-values, and 95% CI's.
+
+```{r expandedtbl}
+
+  model_stats %>% 
+  kable %>% 
+  pack_rows(
+    index = c(
+      'Tobacco self-report' = 7,
+      'Cotinine 1' = 6,
+      'Cotinine 2' = 7,
+      'Number of harms' = 8,
+      'Share presentation' = 6
+    )
+  ) %>% 
+  kable_styling()
+
+```
+
 
 # References

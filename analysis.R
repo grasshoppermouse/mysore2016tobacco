@@ -8,7 +8,7 @@
 # slightly from placektobacco
 
 library(placektobaccopublic)
-# library(placektobacco) # Not publicly available 
+# library(placektobacco) # Not publicly available
 
 library(tidyverse)
 library(lme4)
@@ -24,15 +24,21 @@ library(car)
 library(boot)
 library(visreg)
 library(glmnetUtils)
+library(broom)
+library(broom.mixed)
 library(hagenutils) # for scale_colour_binary, scale_fill_binary
 
 # Estimate a cotinine cutoff from the data -----------------------------------------------
 
+# Fit Gaussian mixture model
 m_mix <- normalmixEM(log10(samples$cotinine))
 samples$comp1 <- m_mix$posterior[,1]
 samples$comp2 <- m_mix$posterior[,2]
 
-cutoff <- 6.5
+mu <- m_mix$mu
+sigman <- m_mix$sigma
+
+cutoff <- 6.5 # Point at which there is an equal probability of belonging to either component
 p_cot_mix <-
   ggplot(samples, aes(cotinine, comp1)) + 
   geom_line(colour='red') + 
@@ -45,14 +51,15 @@ p_cot_mix
 
 # Prepare data for regression modeling ------------------------------------
 
-women_vars <- c('ID', 'GroupID', 'age', 'Presentation', 'trimester', 'nicotine1', 'nicotine2')
+# Combine baseline vars with baseline and followup cotinine values
+
+women_vars <- c('ID', 'GroupID', 'age', 'Presentation', 'pregnancy_status', 'trimester', 'nicotine1', 'nicotine2')
 
 # ID 202 provided followup saliva but did not attend presentation; remove
 df <-
   samples %>%
   dplyr::filter(ID != '202') %>% 
-  left_join(women[c('ID', 'pregnancy_status')]) %>% 
-  dplyr::select(ID, pregnancy_status, pre_post, cotinine) %>%
+  dplyr::select(ID, pre_post, cotinine) %>%
   spread(key = pre_post, value = cotinine) %>%
   left_join(women[women_vars], by = 'ID') %>%
   mutate(
@@ -74,6 +81,7 @@ df <-
     Overreporting = (nicotine1 == 1 & pre < 3) | (nicotine2 == 1 & post < 3)
     )
 
+# ggplot likes data in long format
 df_long <- 
   df %>%
   dplyr::select(ID, pre, post, `Tobacco use 12hrs (baseline)`, `Tobacco use 12hrs (followup)`) %>% 
@@ -98,6 +106,7 @@ time_lbl <- c(
   post = 'Follow-up'
 )
 
+# Pre/post cotinine by self-reported use
 plot_cot_self_pre <-
   ggplot(df_long, aes(cotinine, fill = cotinine>=3)) + 
   geom_histogram(binwidth = 0.35) + 
@@ -147,6 +156,7 @@ explorevars <-
     'nondomestic_work_hrs'
   )
 
+# Nice names
 explore_rename <- c(
   "(Intercept)" = "Intercept",
   "age" = "Age",
@@ -173,6 +183,8 @@ explore_rename <- c(
   'nondomestic_work_hrs' = "Non-domestic work hours"
 )
 
+# Prepare data for elastic net regression
+# Standardize continuous vars by 2SD, per Gelman
 dfw0 <- 
   df %>% 
   left_join(women[explorevars]) %>%
@@ -197,7 +209,8 @@ dfw0 <-
 
 dfw1 <- dplyr::select(dfw0, -Underreporting, -GroupID)
 
-# Obtain stable estimate of lambda.min
+# Cross-validate glmnet many times to
+# obtain stable estimate of lambda.min
 cvm <- 0
 for (i in 1:80){
   cv.user <- cv.glmnet(user  ~., family = 'binomial', data = dfw1, alpha = 0.2, standardize = F)
@@ -240,6 +253,7 @@ followup_usersonly <-
     !non_user
   )
 
+# Prepare data for ggplot mosaic plot
 cog_table <-
   followup_usersonly %>% 
   dplyr::select(ID, cuttingback2, thoughtquitting, consequence, craved) %>% 
@@ -269,8 +283,10 @@ p_cog <-
   scale_y_productlist('') +
   theme_minimal(15)
 
-# PCA as requested by editor
 
+# PCA of psychological vars as requested by editor ----------------------------------------------
+
+# Prepare psychological data for PCA
 pca_cog <-
   followup_usersonly %>% 
   dplyr::select(ID, Presentation, cuttingback2, thoughtquitting, consequence, craved) %>% 
@@ -295,11 +311,12 @@ ggplot(pca_cog, aes(PC1, factor(Presentation))) + geom_violin() + geom_jitter()
 
 cor.test(~Presentation+PC1, pca_cog)
 
+# Tobacco use frequency ---------------------------------------------------
+
 # Tobacco use X Presentation table
 tobacco_use_presentation <- xtabs(~tobacco_use+Presentation, followup)
 
-# Tobacco use frequency ---------------------------------------------------
-
+# Prepare data for model of followup frequency
 followup <-
   followup %>% 
   left_join(women[c('ID', 'tobacco_24hr_freq2', 'trimester')])
@@ -703,5 +720,74 @@ df4 <-
   rename(General_harms = `General harms`, Reproductive_harms = `Reproductive harms`) %>% 
   mutate(Total_harms = General_harms + Reproductive_harms)
 
-m_cot_deltargharms <- glmmTMB(post ~ pre * Presentation + General_harms + Reproductive_harms + (1|GroupID), family = gaussian, data = df4)
+m_cot_deltargharms <- glmmTMB(log10(post) ~ log10(pre) + trimester + Presentation + General_harms + Reproductive_harms + (1|GroupID), family = gaussian, data = df4)
 summary(m_cot_deltargharms)
+
+p_m_cot_deltargharmsGH <- 
+  visreg(m_cot_deltargharms, xvar='General_harms', gg=T) +
+  labs(x='\nΔNumber of general harms', y='Followup log10 salivary cotinine\n') +
+  theme_bw()
+p_m_cot_deltargharmsGH
+
+p_m_cot_deltargharmsRH <- 
+  visreg(m_cot_deltargharms, xvar='Reproductive_harms', gg=T) +
+  labs(x='\nΔNumber of reproductive harms', y='') +
+  theme_bw()
+p_m_cot_deltargharmsRH
+
+
+# Alternative regression table --------------------------------------------
+
+var_dict <- c(
+  '(Intercept)' = '(Intercept)',
+  # 'sd__(Intercept)' = 'SD (random intercept)',
+  # 'sd__Observation' = 'SD (observation)',
+  'trimester2' = 'Trimester 2',
+  'trimester3' = 'Trimester 3',
+  'trimesterNot pregnant' = 'Not pregnant',
+  'PresentationRHP' = 'RHP',
+  'tobacco_24hr_freq2' = 'Baseline Tobacco Frequency',
+  'tobacco_24hr_freq2:PresentationRHP' = 'Baseline Tobacco Frequency * RHP',
+  'pre' = 'Baseline cotinine',
+  'pre:PresentationRHP' = 'Baseline cotinine * RHP',
+  'baseline_number' = 'Baseline number of harms',
+  # 'Reproductive_harms' = 'Number of reproductive harms',
+  # 'General_harms' = 'Number of general harms',
+  'harm_typeReproductive harms' = 'Number of reproductive harms',
+  'PresentationRHP:harm_typeReproductive harms' = 'Number of reproductive harms * RHP',
+  'followup_number' = 'Total number of harms at followup'
+)
+
+varnames <- c('term', 'estimate', 'std.error', 'statistic', 'p.value', 'conf.low', 'conf.high')
+# varnames_round <- c('estimate', 'std.error', 'statistic', 'conf.low', 'conf.high')
+
+models <- list(
+  'Tobacco self-report' = m_tobacco_freq, 
+  'Cotinine 1' = m_post1, 
+  'Cotinine 2' = m_post2b,
+  'Number of harms' = m_harms, 
+  'Share presentation' = m_share
+  )
+
+model_stats <- 
+  map_df(models, ~tidy(., conf.int=T)) %>% 
+  dplyr::select(all_of(varnames)) %>%
+  dplyr::filter(!str_detect(term, 'sd')) %>% 
+  mutate(
+    term = var_dict[term],
+    across(estimate:statistic, ~round(., 2)),
+    p.value = signif(p.value, 2),
+    across(conf.low:conf.high, ~signif(., 3)),
+    across(everything(), as.character),
+    across(everything(), ~ ifelse(is.na(.), '', .))
+    ) %>% 
+  rename(
+    Variable = term,
+    Estimate = estimate,
+    SE = std.error,
+    'Z-value' = statistic,
+    'P-value' = p.value,
+    'Lower 95% CI' = conf.low,
+    'Upper 95% CI' = conf.high
+  )
+

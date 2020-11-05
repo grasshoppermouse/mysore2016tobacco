@@ -501,10 +501,15 @@
     },
     "ggmosaic": {
       "Package": "ggmosaic",
-      "Version": "0.2.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "bc103b8bd56a3d8b676749b77aedcb81"
+      "Version": "0.3.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "ggmosaic",
+      "RemoteUsername": "haleyjeppson",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "c095f3a03dc1292b43056bb3957447450ae8ee01",
+      "Hash": "f4ea462d7cca29ec4ec679bd19eeacac"
     },
     "ggnewscale": {
       "Package": "ggnewscale",
@@ -650,13 +655,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a525aba14184fec243f9eaec62fbed43"
-    },
-    "huxtable": {
-      "Package": "huxtable",
-      "Version": "5.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a329bf19a5fe97aee594ec6522a3f928"
     },
     "insight": {
       "Package": "insight",
@@ -811,13 +809,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "d16f18aeb023d7a80c090d9458fc75a6"
-    },
-    "memoise": {
-      "Package": "memoise",
-      "Version": "1.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "58baa74e4603fcfb9a94401c58c8f9b1"
     },
     "mgcv": {
       "Package": "mgcv",
@@ -1099,10 +1090,10 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.11.0",
+      "Version": "0.12.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "1c3ef87cbb81c23ac96797781ec7aecc"
+      "Hash": "b95626d4e5b1ec52f47ee4e156926bf2"
     },
     "reprex": {
       "Package": "reprex",
