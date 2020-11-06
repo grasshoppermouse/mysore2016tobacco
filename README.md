@@ -1,5 +1,7 @@
 # mysore2016tobacco
 
+[![DOI](https://zenodo.org/badge/288039354.svg)](https://zenodo.org/badge/latestdoi/288039354)
+
 This repository contains all code necessary to reproduce:
 
 [*The impact of information about tobacco-related reproductive vs. general health risks on South Indian women's tobacco use decisions*](https://grasshoppermouse.github.io/mysore2016tobacco/). Caitlyn D. Placek, Renee E. Magnan, Vijaya Srinivas, Poornima Jaykrishna, Kavitha Ravi, Anisa Khan, Purnima Madhivanan and Edward H. Hagen
