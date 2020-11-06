@@ -28,6 +28,8 @@ library(broom)
 library(broom.mixed)
 library(hagenutils) # for scale_colour_binary, scale_fill_binary
 
+set.seed(5678765)
+
 # Estimate a cotinine cutoff from the data -----------------------------------------------
 
 # Fit Gaussian mixture model
