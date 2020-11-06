@@ -132,7 +132,7 @@ percent_preg_tobacco
 # Misreporting tobacco use ----------------------------------------------------------
 
 misreportPreOrPost <- signif(100*sum(df$Underreporting)/nrow(df), 2)
-misreportPreOrPost2 <- signif(100*sum((df$nicotine1 == 0 & df$pre>=3) | (df$nicotine2 == 0 & df$post>=3))/nrow(df), 2)
+misreportPreOrPost2 <- signif(100*sum((df$nicotine1 == 0 & df$pre>=6.5) | (df$nicotine2 == 0 & df$post>=6.5))/nrow(df), 2)
 overreportPreOrPost <- signif(100*sum(df$Overreporting)/nrow(df), 2)
 
 # Explore predictors of tobacco use  --------------------------------------
