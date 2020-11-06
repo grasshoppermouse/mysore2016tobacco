@@ -1,6 +1,5 @@
 ---
 title: The impact of information about tobacco-related reproductive vs. general health risks on South Indian women's tobacco use decisions
-author: Caitlyn D. Placek, Renee E. Magnan, Vijaya Srinivas, Poornima Jaykrishna, Kavitha Ravi, Anisa Khan, Purnima Madhivanan and Edward H. Hagen
 output: 
   bookdown::html_document2:
     toc: false
@@ -10,6 +9,24 @@ always_allow_html: true
 csl: apa.csl
 bibliography: mysore_tobacco2016.bib
 ---
+
+#### Caitlyn D. Placek^1^, Renee E. Magnan^2^, Vijaya Srinivas^3^, Poornima Jaykrishna^3^, Kavitha Ravi^3^, Anisa Khan^3^, Purnima Madhivanan^3,4,5,6^ and Edward H. Hagen^7,^*
+
+^1^Department of Anthropology, Ball State University, Muncie, IN
+
+^2^Department of Psychology, Washington State University, Vancouver, WA
+
+^3^Public Health Research Institute of India, Mysore, Karnataka, India
+
+^4^Department of Health Promotion Sciences, Mel & Enid Zuckerman College of Public Health, University of Arizona, Tucson, Arizona
+
+^5^Division of Infectious Diseases, College of Medicine, University of Arizona, Tucson, Arizona
+
+^6^Department of Family & Community Medicine, College of Medicine, University of Arizona, Tucson, Arizona
+
+^7^Department of Anthropology, Washington State University, Vancouver, WA
+
+*Please address correspondence to Edward H. Hagen, Department of Anthropology, Washington State University, Vancouver, WA 98686. Phone number: 360-546-9257, email: edhagen@wsu.edu
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.width = 10, scipen=99999)
@@ -123,7 +140,7 @@ We used linear and generalized linear mixed effects regression models to test th
 
 We conducted exploratory analyses of predictors of tobacco use using elasticnet regression, a technique developed for analyses in which the number of predictors is large relative to the number of cases [@friedman2010]. For a brief description of this model, see the SI. We set the mixing parameter $\alpha=0.2$ and chose the regularization parameter $\lambda$ by cross-validation.
 
-All analyses were conducted in `r R.version.string`. Data are available here: https://doi.org/10.5281/zenodo.3987496
+All analyses were conducted in `r R.version.string`. Code is available here: https://github.com/grasshoppermouse/mysore2016tobacco. Data are available here: https://doi.org/10.5281/zenodo.3987496
 
 ## Ethical approval
 
@@ -380,6 +397,26 @@ The study had a relatively small sample size. Although we endeavored to restrict
 The prevalence of tobacco use among women in LMICs is currently low, and this demographic is therefore increasingly targeted by tobacco companies. It is imperative to develop public health initiatives to counter tobacco advertising and maintain low rates of tobacco use. Unfortunately, health behavior change interventions are often ineffective in low-income groups [@bull2014]. Evolutionary theories predict that individuals in adverse conditions more steeply discount the future, and that the substance use decisions of reproductive-age women are heavily influenced by information about reproductive harms. We therefore used a cluster-randomized controlled design to test if a presentation on tobacco harms that emphasized near-term reproductive harms, such as pregnancy loss, would have a greater negative impact on subsequent tobacco use than one that emphasized general harms that tend to occur later in life, such as cancer. 
 
 As predicted, we found that a disadvantaged population of reproductive-age women in South India were mostly unaware of tobacco's reproductive harms, and that information from a brief presentation on such harms was salient and retained ten days later. Contrary to predictions, we found that presentations on reproductive and general harms had approximately equal effects on subsequent increased knowledge of harms of tobacco use. Nevertheless, an intriguing exploratory analysis found that women who listed an increased number of reproductive harms at followup had significantly lower cotinine levels. Future studies of tobacco control messages should take into account the psychological impact of the messages; the local disease ecology, such as the high rate of oral cancer in the study population; and should incorporate harms that have near-term consequences for young people, such as negative impacts on attractiveness, and for women, negative impacts on pregnancy.
+
+## Acknowledgements
+
+We would like to thank our participants for their engagement in the study and staff from the Public Health Research Institute of India for assisting with data collection.
+
+## Author contributions
+
+CDP and EHH conceived of the study. CDP, REM, and EHH designed the study. CDP, VS, PJ, KR, AK, and PM carried out the study. CDP and EHH analyzed the data and wrote the initial draft of the paper. All authors contributed to the final draft of the paper.
+
+## Financial support
+
+Funding was provided by the Washington State University Meyer Award and the Washington State University Vancouver Mini Grant to EHH and CDP; startup funds to CDP from Ball State University; and PM was partially funded by the National Institutes for Health grants # R15-AI128714-01 and D43 TW010540.
+
+## Conflicts of interest
+
+CDP, REM, VS, PJ, KR, AK, PM, and EHH declare none.
+
+## Research Transparency and Reproducibility
+
+Data analysis code, presentation slides, and questionnaires are available here: https://github.com/grasshoppermouse/mysore2016tobacco. Data are archived here: https://doi.org/10.5281/zenodo.3987496
 
 # Supplementary information
 
