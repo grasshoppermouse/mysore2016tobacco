@@ -16,3 +16,5 @@ Instructions:
 Note 1: Analyses used "R version 3.6.3 (2020-02-29)". You might need to install this version of R to reproduce them.
 
 Note 2: Some results will differ slightly from the official version because identifying information in `placektobaccopublic`, such as age and income, has been aggregated into coarser categories to help preserve anonymity.
+
+Note 3: This paper has been published in Evolutionary Human Sciences: https://doi.org/10.1017/ehs.2020.61
