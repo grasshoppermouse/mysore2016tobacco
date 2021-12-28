@@ -6,6 +6,10 @@ This repository contains all code necessary to reproduce:
 
 [*The impact of information about tobacco-related reproductive vs. general health risks on South Indian women's tobacco use decisions*](https://grasshoppermouse.github.io/mysore2016tobacco/). Caitlyn D. Placek, Renee E. Magnan, Vijaya Srinivas, Poornima Jaykrishna, Kavitha Ravi, Anisa Khan, Purnima Madhivanan and Edward H. Hagen
 
+This paper is now published:
+Evolutionary Human Sciences , Volume 3 , 2021 , e4
+DOI: https://doi.org/10.1017/ehs.2020.61
+
 Instructions:
 
 1. Clone this repository
